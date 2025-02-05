@@ -1,6 +1,7 @@
 package service
 
 import (
+	"encoding/json"
 	"fmt"
 	"git-booster/internal/model"
 	"git-booster/internal/utils"
@@ -11,7 +12,7 @@ import (
 )
 
 // ProcessCommits handles the commit process based on the commit request
-func ProcessCommits(req model.CommitRequest) error {
+func ProcessCommits(req model.CommitRequest, commitDates []string, commitMessages []string) error {
 	// Clone the repository (no authentication needed for public repos)
 	repoPath, err := cloneRepo(req.RepoURL)
 	if err != nil {
@@ -26,12 +27,6 @@ func ProcessCommits(req model.CommitRequest) error {
 
 	// Start the commit process
 	commitIndex := 1
-	commitDates := req.CommitDates
-	commitMessages := req.CommitMessages
-
-	if len(commitDates) == 0 {
-		commitDates = utils.GetCommitDates(req) // Default to today's date if none is provided
-	}
 
 	// Loop through each commit date
 	for i, commitDate := range commitDates {
@@ -47,7 +42,7 @@ func ProcessCommits(req model.CommitRequest) error {
 			file.WriteString(fmt.Sprintf("package main\n\n// Commit %d on %s\n", commitIndex, commitDate))
 			file.Close()
 
-			// Set the commit date
+			// Set the commit date using utils
 			utils.SetCommitDate(commitDate, commitIndex)
 
 			// Run git commands to add and commit changes
@@ -91,4 +86,32 @@ func cloneRepo(repoURL string) (string, error) {
 		return "", fmt.Errorf("failed to clone repo: %v", err)
 	}
 	return repoPath, nil
+}
+
+// readDefaultCommitMessages reads the default commit messages from the config file
+func readDefaultCommitMessages() ([]string, error) {
+	// Define the file path for commit messages JSON
+	configFilePath := "internal/configs/commit_messages.json"
+
+	// Open the file
+	file, err := os.Open(configFilePath)
+	if err != nil {
+		return nil, fmt.Errorf("failed to open commit_messages.json: %v", err)
+	}
+	defer file.Close()
+
+	// Decode the JSON file into a map
+	var configData map[string][]string
+	decoder := json.NewDecoder(file)
+	if err := decoder.Decode(&configData); err != nil {
+		return nil, fmt.Errorf("failed to decode commit_messages.json: %v", err)
+	}
+
+	// Retrieve the default commit messages
+	defaultMessages, ok := configData["default_commit_messages"]
+	if !ok {
+		return nil, fmt.Errorf("missing default_commit_messages key in the config file")
+	}
+
+	return defaultMessages, nil
 }

@@ -1,5 +1,5 @@
 {
-    "messages": [
+    "default_commit_messages": [
       "Fixed bug in the user authentication system",
       "Updated readme with new setup instructions",
       "Refactored the database connection logic",
