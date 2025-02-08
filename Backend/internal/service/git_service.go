@@ -9,6 +9,7 @@ import (
 	"os/exec"
 	"path/filepath"
 	"time"
+	"strings"
 )
 
 // ProcessCommits handles the commit process based on the commit request
@@ -64,6 +65,9 @@ func cloneRepo(repoURL string) (string, error) {
 	repoName := filepath.Base(repoURL)
 	repoPath := filepath.Join("repos", repoName)
 
+	// Convert HTTPS URL to SSH (if needed)
+	sshURL := convertToSSH(repoURL)
+
 	// Check if the repo exists
 	if _, err := os.Stat(repoPath); !os.IsNotExist(err) {
 		// Reset repo to discard any local changes
@@ -80,14 +84,21 @@ func cloneRepo(repoURL string) (string, error) {
 		return repoPath, nil
 	}
 
-	// If the repo doesn't exist, clone it
-	cmd := exec.Command("git", "clone", repoURL, repoPath)
+	// If the repo doesn't exist, clone it using SSH
+	cmd := exec.Command("git", "clone", sshURL, repoPath)
 	if err := cmd.Run(); err != nil {
 		return "", fmt.Errorf("failed to clone repo: %v", err)
 	}
 	return repoPath, nil
 }
 
+// convertToSSH converts HTTPS Git URLs to SSH format
+func convertToSSH(repoURL string) string {
+	if strings.HasPrefix(repoURL, "https://github.com/") {
+		return strings.Replace(repoURL, "https://github.com/", "git@github.com:", 1)
+	}
+	return repoURL
+}
 // readDefaultCommitMessages reads the default commit messages from the config file
 func readDefaultCommitMessages() ([]string, error) {
 	// Define the file path for commit messages JSON
