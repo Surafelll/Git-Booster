@@ -1,0 +1,295 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Dashboard - Gitboster</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    <style>
+        body {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+        .dashboard-card {
+            background: rgba(255, 255, 255, 0.95);
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            border-radius: 15px;
+            padding: 30px;
+            margin: 20px 0;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.1);
+        }
+        .navbar {
+            background: rgba(255, 255, 255, 0.1);
+            backdrop-filter: blur(10px);
+        }
+        .navbar-brand {
+            font-weight: bold;
+            font-size: 24px;
+        }
+        .btn-primary {
+            background: #667eea;
+            border-color: #667eea;
+        }
+        .btn-primary:hover {
+            background: #5a6fd8;
+            border-color: #5a6fd8;
+        }
+        .alert {
+            border-radius: 10px;
+        }
+        .form-control, .form-select {
+            border-radius: 10px;
+        }
+        .job-item {
+            background: #f8f9fa;
+            border-radius: 10px;
+            padding: 15px;
+            margin: 10px 0;
+            border-left: 4px solid #667eea;
+        }
+    </style>
+</head>
+<body>
+    <nav class="navbar navbar-expand-lg navbar-dark">
+        <div class="container">
+            <a class="navbar-brand" href="/">
+                <i class="fab fa-github"></i> Gitboster
+            </a>
+            <div class="navbar-nav ms-auto">
+                <span class="navbar-text me-3">
+                    Welcome, <%= user.displayName || user.username %>
+                </span>
+                <a class="nav-link" href="/logout">Logout</a>
+            </div>
+        </div>
+    </nav>
+
+    <div class="container mt-4">
+        <div class="row">
+            <div class="col-md-8">
+                <div class="dashboard-card">
+                    <h3><i class="fas fa-rocket"></i> Schedule Commits</h3>
+                    <form id="scheduleForm">
+                        <div class="mb-3">
+                            <label for="repoSelect" class="form-label">Select Repository</label>
+                            <select class="form-select" id="repoSelect" name="repoName" required>
+                                <option value="">Loading repositories...</option>
+                            </select>
+                        </div>
+                        
+                        <div class="row">
+                            <div class="col-md-6">
+                                <div class="mb-3">
+                                    <label for="startDate" class="form-label">Start Date</label>
+                                    <input type="date" class="form-control" id="startDate" name="startDate" required>
+                                </div>
+                            </div>
+                            <div class="col-md-6">
+                                <div class="mb-3">
+                                    <label for="endDate" class="form-label">End Date</label>
+                                    <input type="date" class="form-control" id="endDate" name="endDate" required>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <div class="mb-3">
+                            <label for="commitsPerDay" class="form-label">Commits per Day</label>
+                            <select class="form-select" id="commitsPerDay" name="commitsPerDay" required>
+                                <option value="1">1 commit</option>
+                                <option value="2">2 commits</option>
+                                <option value="3">3 commits</option>
+                                <option value="4">4 commits</option>
+                                <option value="5">5 commits</option>
+                                <option value="6">6 commits</option>
+                                <option value="7">7 commits</option>
+                                <option value="8">8 commits</option>
+                                <option value="9">9 commits</option>
+                                <option value="10">10 commits</option>
+                            </select>
+                        </div>
+                        
+                        <button type="submit" class="btn btn-primary btn-lg">
+                            <i class="fas fa-play"></i> Schedule Commits
+                        </button>
+                    </form>
+                </div>
+            </div>
+            
+            <div class="col-md-4">
+                <div class="dashboard-card">
+                    <h4><i class="fas fa-info-circle"></i> How it Works</h4>
+                    <ol>
+                        <li>Select a public repository</li>
+                        <li>Choose date range for commits</li>
+                        <li>Set commits per day (1-10)</li>
+                        <li>Click "Schedule Commits"</li>
+                        <li>Commits will be automatically created</li>
+                    </ol>
+                    
+                    <div class="alert alert-warning mt-3">
+                        <i class="fas fa-exclamation-triangle"></i>
+                        <strong>Note:</strong> This tool creates commits in a `.gitboster` folder in your repository.
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <div class="row mt-4">
+            <div class="col-12">
+                <div class="dashboard-card">
+                    <h4><i class="fas fa-list"></i> Scheduled Jobs</h4>
+                    <div id="scheduledJobs">
+                        <p class="text-muted">Loading scheduled jobs...</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Alert Modal -->
+    <div class="modal fade" id="alertModal" tabindex="-1">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="alertModalTitle">Alert</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                </div>
+                <div class="modal-body" id="alertModalBody"></div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/js/bootstrap.bundle.min.js"></script>
+    <script>
+        // Load repositories
+        async function loadRepositories() {
+            try {
+                const response = await fetch('/api/repos');
+                const repos = await response.json();
+                
+                const select = document.getElementById('repoSelect');
+                select.innerHTML = '<option value="">Select a repository...</option>';
+                
+                repos.forEach(repo => {
+                    const option = document.createElement('option');
+                    option.value = repo.name;
+                    option.textContent = `${repo.name} (${repo.visibility})`;
+                    select.appendChild(option);
+                });
+            } catch (error) {
+                console.error('Error loading repositories:', error);
+                document.getElementById('repoSelect').innerHTML = '<option value="">Error loading repositories</option>';
+            }
+        }
+        
+        // Load scheduled jobs
+        async function loadScheduledJobs() {
+            try {
+                const response = await fetch('/api/scheduled-jobs');
+                const jobs = await response.json();
+                
+                const container = document.getElementById('scheduledJobs');
+                
+                if (jobs.length === 0) {
+                    container.innerHTML = '<p class="text-muted">No scheduled jobs found.</p>';
+                    return;
+                }
+                
+                container.innerHTML = jobs.map(job => `
+                    <div class="job-item">
+                        <div class="d-flex justify-content-between align-items-center">
+                            <div>
+                                <strong>${job.repoName}</strong><br>
+                                <small class="text-muted">
+                                    ${job.startDate} to ${job.endDate} 
+                                    (${job.commitsPerDay} commits/day)
+                                </small>
+                            </div>
+                            <button class="btn btn-sm btn-outline-danger" onclick="cancelJob('${job.id}')">
+                                <i class="fas fa-times"></i> Cancel
+                            </button>
+                        </div>
+                    </div>
+                `).join('');
+            } catch (error) {
+                console.error('Error loading scheduled jobs:', error);
+                document.getElementById('scheduledJobs').innerHTML = '<p class="text-danger">Error loading scheduled jobs</p>';
+            }
+        }
+        
+        // Cancel job
+        async function cancelJob(jobId) {
+            try {
+                const response = await fetch(`/api/scheduled-jobs/${jobId}`, {
+                    method: 'DELETE'
+                });
+                
+                if (response.ok) {
+                    loadScheduledJobs();
+                    showAlert('Success', 'Job cancelled successfully');
+                } else {
+                    showAlert('Error', 'Failed to cancel job');
+                }
+            } catch (error) {
+                console.error('Error cancelling job:', error);
+                showAlert('Error', 'Error cancelling job');
+            }
+        }
+        
+        // Show alert modal
+        function showAlert(title, message) {
+            document.getElementById('alertModalTitle').textContent = title;
+            document.getElementById('alertModalBody').textContent = message;
+            new bootstrap.Modal(document.getElementById('alertModal')).show();
+        }
+        
+        // Handle form submission
+        document.getElementById('scheduleForm').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            
+            const formData = new FormData(e.target);
+            const data = Object.fromEntries(formData);
+            
+            try {
+                const response = await fetch('/api/schedule-commits', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify(data)
+                });
+                
+                const result = await response.json();
+                
+                if (response.ok) {
+                    showAlert('Success', result.message);
+                    loadScheduledJobs();
+                    e.target.reset();
+                } else {
+                    showAlert('Error', result.error || 'Failed to schedule commits');
+                }
+            } catch (error) {
+                console.error('Error scheduling commits:', error);
+                showAlert('Error', 'Error scheduling commits');
+            }
+        });
+        
+        // Initialize
+        document.addEventListener('DOMContentLoaded', () => {
+            loadRepositories();
+            loadScheduledJobs();
+            
+            // Set minimum date to today
+            const today = new Date().toISOString().split('T')[0];
+            document.getElementById('startDate').setAttribute('min', today);
+            document.getElementById('endDate').setAttribute('min', today);
+        });
+    </script>
+</body>
+</html>
