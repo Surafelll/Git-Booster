@@ -1,20 +1,62 @@
-# Gitboster
+# Gitboster 2.0
 
-Gitboster is a GitHub commit automation tool that helps you boost your GitHub activity with automated commits. Schedule commits across date ranges and maintain consistent GitHub activity.
+Gitboster is an advanced GitHub commit automation platform built with NestJS and React. It provides sophisticated commit scheduling, data analytics, and user management features to help maintain consistent GitHub activity.
 
-## Features
+## 🚀 Features
 
-- 🔐 **GitHub OAuth Authentication** - Secure login with your GitHub account
-- 📅 **Date Range Selection** - Choose specific date ranges for commit activity
-- 🔄 **Customizable Frequency** - Set 1-10 commits per day
-- 📝 **Smart Commit Messages** - Automatic generation of professional commit messages
-- 🗂️ **Repository Management** - Select from your public repositories
-- ⏰ **Scheduled Jobs** - View and manage your scheduled commit jobs
+### Core Features
+- 🔐 **Multi-Auth System** - JWT authentication + GitHub OAuth integration
+- 👥 **User Management** - Complete CRUD operations with role-based access
+- 📅 **Advanced Scheduling** - Intelligent commit scheduling with date ranges
+- 🎯 **Smart Commit Logic** - Customizable commit messages and frequencies (1-20 per day)
+- 🗂️ **Repository Management** - Full GitHub API integration
+- ⏰ **Job Management** - Create, monitor, and cancel commit jobs
 
-## Setup
+### Analytics & Insights
+- � **Comprehensive Analytics** - Dashboard with detailed commit statistics
+- 📈 **Trend Analysis** - 30-day commit trends and patterns
+- 🏆 **Repository Analytics** - Per-repository performance metrics
+- ⏰ **Time Distribution** - Hourly and weekly commit patterns
+- 📋 **Job Performance** - Success rates and execution monitoring
+- � **Advanced Insights** - AI-powered analytics and recommendations
+
+### Technical Features
+- 🏗️ **Modern Architecture** - NestJS backend with TypeORM and SQLite
+- ⚡ **React Frontend** - Modern UI with Material-UI and TypeScript
+- 🔒 **Enterprise Security** - JWT tokens with secure authentication
+- 📊 **Data Visualization** - Interactive charts with Chart.js
+- 🎨 **Responsive Design** - Beautiful, mobile-friendly interface
+- 🚀 **Real-time Updates** - Live job status and analytics
+
+## 🏗️ Architecture
+
+### Backend (NestJS)
+```
+src/
+├── auth/           # Authentication & Authorization
+├── user/           # User CRUD operations
+├── commit/         # Commit job management
+├── github/         # GitHub API integration
+├── analytics/      # Data analytics & insights
+└── main.ts         # Application entry point
+```
+
+### Frontend (React + TypeScript)
+```
+frontend/
+├── src/
+│   ├── components/ # Reusable UI components
+│   ├── pages/      # Application pages
+│   ├── services/   # API service layer
+│   ├── hooks/      # Custom React hooks
+│   └── types/      # TypeScript definitions
+```
+
+## 🛠️ Setup
 
 ### Prerequisites
-- Node.js (v14 or higher)
+- Node.js (v16 or higher)
+- npm or yarn
 - GitHub account
 - GitHub OAuth App
 
@@ -24,90 +66,163 @@ Gitboster is a GitHub commit automation tool that helps you boost your GitHub ac
 2. Click "New OAuth App"
 3. Fill in the application details:
    - Application name: `Gitboster`
-   - Homepage URL: `http://localhost:3000`
-   - Authorization callback URL: `http://localhost:3000/auth/github/callback`
-4. Click "Register application"
-5. Copy the Client ID and Client Secret
+   - Homepage URL: `http://localhost:3001`
+   - Authorization callback URL: `http://localhost:3000/api/auth/github/callback`
+4. Copy the Client ID and Client Secret
 
-### 2. Install Dependencies
+### 2. Backend Setup
 
 ```bash
+# Install dependencies
 npm install
-```
 
-### 3. Environment Configuration
-
-1. Copy the environment template:
-```bash
+# Copy environment template
 cp .env.example .env
-```
 
-2. Edit `.env` and add your GitHub OAuth credentials:
-```
+# Edit .env with your GitHub OAuth credentials
 GITHUB_CLIENT_ID=your_github_client_id
 GITHUB_CLIENT_SECRET=your_github_client_secret
-SESSION_SECRET=your_session_secret
+GITHUB_CALLBACK_URL=http://localhost:3000/api/auth/github/callback
+JWT_SECRET=your_jwt_secret
 PORT=3000
-BASE_URL=http://localhost:3000
+FRONTEND_URL=http://localhost:3001
+NODE_ENV=development
+
+# Build and start the backend
+npm run build
+npm run start:dev
 ```
 
-### 4. Start the Application
+### 3. Frontend Setup
 
 ```bash
+# Navigate to frontend directory
+cd frontend
+
+# Install dependencies
+npm install
+
+# Start the development server
 npm start
 ```
 
-For development with auto-reload:
+## 🎯 Usage
+
+### Authentication
+- **JWT Login**: Register/login with email and password
+- **GitHub OAuth**: One-click authentication with GitHub
+- **Token Management**: Secure JWT tokens with 7-day expiration
+
+### Creating Commit Jobs
+1. **Repository Selection**: Choose from your GitHub repositories
+2. **Date Configuration**: Set start and end dates for the campaign
+3. **Commit Frequency**: Configure 1-20 commits per day
+4. **Custom Messages**: Use default messages or provide your own
+5. **Schedule & Monitor**: Track job progress in real-time
+
+### Analytics Dashboard
+- **Overview**: Total jobs, commits, and success rates
+- **Trends**: Visual charts showing commit patterns over time
+- **Repository Insights**: Performance metrics per repository
+- **Time Analysis**: Discover your most active hours and days
+- **Job Monitoring**: Track individual job performance
+
+## 🔧 API Endpoints
+
+### Authentication
+- `POST /api/auth/login` - JWT login
+- `POST /api/auth/register` - User registration
+- `GET /api/auth/github` - GitHub OAuth login
+- `GET /api/auth/github/callback` - OAuth callback
+
+### User Management
+- `GET /api/users` - List users (admin)
+- `GET /api/users/me` - Get current user profile
+- `PATCH /api/users/:id` - Update user
+- `DELETE /api/users/:id` - Delete user
+
+### Commit Jobs
+- `POST /api/commits/jobs` - Create commit job
+- `GET /api/commits/jobs` - List user's jobs
+- `GET /api/commits/jobs/:id` - Get job details
+- `DELETE /api/commits/jobs/:id` - Cancel job
+
+### GitHub Integration
+- `GET /api/github/repositories` - List user repositories
+- `GET /api/github/user` - Get GitHub user info
+- `GET /api/github/repositories/:owner/:repo/commits` - Commit history
+
+### Analytics
+- `GET /api/analytics/dashboard` - Dashboard overview
+- `GET /api/analytics/trends` - Commit trends
+- `GET /api/analytics/repositories` - Repository analytics
+- `GET /api/analytics/advanced` - Advanced insights
+
+## 🔒 Security
+
+- **JWT Authentication**: Secure token-based authentication
+- **Password Hashing**: bcrypt with salt rounds
+- **Input Validation**: Comprehensive request validation
+- **CORS Protection**: Configured for frontend integration
+- **GitHub Token Security**: Tokens stored securely and never logged
+
+## 📊 Database Schema
+
+### Users
+- User profiles with GitHub integration
+- Role-based access control
+- Secure password storage
+
+### Commit Jobs
+- Flexible job configuration
+- Status tracking and monitoring
+- Custom commit message support
+
+### Commit Logs
+- Detailed execution logs
+- Success/failure tracking
+- Performance analytics
+
+## 🚀 Deployment
+
+### Production Build
 ```bash
-npm run dev
+# Backend
+npm run build
+npm run start:prod
+
+# Frontend
+cd frontend
+npm run build
 ```
 
-## Usage
+### Environment Variables
+```bash
+NODE_ENV=production
+JWT_SECRET=strong_production_secret
+GITHUB_CLIENT_ID=production_client_id
+GITHUB_CLIENT_SECRET=production_client_secret
+FRONTEND_URL=https://your-domain.com
+```
 
-1. **Authentication**: Visit `http://localhost:3000` and sign in with GitHub
-2. **Repository Selection**: Choose a public repository from your account
-3. **Date Configuration**: Select start and end dates for commit activity
-4. **Frequency Setting**: Choose how many commits per day (1-10)
-5. **Schedule**: Click "Schedule Commits" to start the automation
-6. **Monitor**: View and manage scheduled jobs in the dashboard
-
-## How It Works
-
-- The application clones your selected repository locally
-- Creates commits in a `.gitboster` folder to avoid interfering with your actual code
-- Generates random commit messages from a curated list
-- Schedules commits at random times throughout each day
-- Automatically pushes commits to your GitHub repository
-
-## Important Notes
-
-- ⚠️ **Use Responsibly**: This tool is for educational purposes. Artificial commit activity may violate GitHub's terms of service
-- 🔒 **Security**: Your GitHub token is only stored in memory during the session
-- 📁 **Repository Changes**: Only creates files in a `.gitboster` folder
-- 🚫 **Limitations**: Works only with public repositories
-
-## API Endpoints
-
-- `GET /` - Landing page
-- `GET /dashboard` - User dashboard (requires authentication)
-- `GET /auth/github` - GitHub OAuth login
-- `GET /auth/github/callback` - OAuth callback
-- `GET /api/repos` - Get user's repositories
-- `POST /api/schedule-commits` - Schedule commit jobs
-- `GET /api/scheduled-jobs` - Get scheduled jobs
-- `DELETE /api/scheduled-jobs/:id` - Cancel scheduled job
-
-## Contributing
+## 🤝 Contributing
 
 1. Fork the repository
-2. Create a feature branch
-3. Make your changes
-4. Submit a pull request
+2. Create a feature branch (`git checkout -b feature/amazing-feature`)
+3. Commit your changes (`git commit -m 'Add amazing feature'`)
+4. Push to the branch (`git push origin feature/amazing-feature`)
+5. Open a Pull Request
 
-## License
+## 📄 License
 
-This project is licensed under the MIT License.
+This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details.
 
-## Disclaimer
+## ⚠️ Disclaimer
 
-This tool is for educational purposes only. Use it responsibly and in accordance with GitHub's terms of service. Artificial commit activity may not reflect genuine contribution activity.
+This tool is for educational and productivity purposes. Please use responsibly and in accordance with GitHub's terms of service. Excessive or inappropriate use may be considered abuse of GitHub's platform.
+
+## 🆘 Support
+
+- Create an issue for bug reports
+- Star the repository if you find it useful
+- Contribute to make it even better!
